@@ -7,8 +7,8 @@ import { COPILOT_EVENTS } from 'dashboard/helper/AnalyticsHelper/events';
 import CopilotInput from './CopilotInput.vue';
 import CopilotLoader from './CopilotLoader.vue';
 import CopilotAgentMessage from './CopilotAgentMessage.vue';
-import CopilotAssistantMessage from './CopilotAssistantMessage.vue';
-import ToggleCopilotAssistant from './ToggleCopilotAssistant.vue';
+import CopilotTopicMessage from './CopilotTopicMessage.vue';
+import ToggleCopilotTopic from './ToggleCopilotTopic.vue';
 import Icon from '../icon/Icon.vue';
 
 const props = defineProps({
@@ -20,7 +20,7 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
-  isCaptainTyping: {
+  isAiagentTyping: {
     type: Boolean,
     default: false,
   },
@@ -28,21 +28,21 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  assistants: {
+  topics: {
     type: Array,
     default: () => [],
   },
-  activeAssistant: {
+  activeTopic: {
     type: Object,
     default: () => ({}),
   },
 });
 
-const emit = defineEmits(['sendMessage', 'reset', 'setAssistant']);
+const emit = defineEmits(['sendMessage', 'reset', 'setTopic']);
 
 const { t } = useI18n();
 
-const COPILOT_USER_ROLES = ['assistant', 'system'];
+const COPILOT_USER_ROLES = ['topic', 'system'];
 
 const sendMessage = message => {
   emit('sendMessage', message);
@@ -69,21 +69,21 @@ const scrollToBottom = async () => {
 
 const promptOptions = [
   {
-    label: 'CAPTAIN.COPILOT.PROMPTS.SUMMARIZE.LABEL',
-    prompt: 'CAPTAIN.COPILOT.PROMPTS.SUMMARIZE.CONTENT',
+    label: 'AIAGENT.COPILOT.PROMPTS.SUMMARIZE.LABEL',
+    prompt: 'AIAGENT.COPILOT.PROMPTS.SUMMARIZE.CONTENT',
   },
   {
-    label: 'CAPTAIN.COPILOT.PROMPTS.SUGGEST.LABEL',
-    prompt: 'CAPTAIN.COPILOT.PROMPTS.SUGGEST.CONTENT',
+    label: 'AIAGENT.COPILOT.PROMPTS.SUGGEST.LABEL',
+    prompt: 'AIAGENT.COPILOT.PROMPTS.SUGGEST.CONTENT',
   },
   {
-    label: 'CAPTAIN.COPILOT.PROMPTS.RATE.LABEL',
-    prompt: 'CAPTAIN.COPILOT.PROMPTS.RATE.CONTENT',
+    label: 'AIAGENT.COPILOT.PROMPTS.RATE.LABEL',
+    prompt: 'AIAGENT.COPILOT.PROMPTS.RATE.CONTENT',
   },
 ];
 
 watch(
-  [() => props.messages, () => props.isCaptainTyping],
+  [() => props.messages, () => props.isAiagentTyping],
   () => {
     scrollToBottom();
   },
@@ -100,14 +100,14 @@ watch(
           :support-agent="supportAgent"
           :message="message"
         />
-        <CopilotAssistantMessage
+        <CopilotTopicMessage
           v-else-if="COPILOT_USER_ROLES.includes(message.role)"
           :message="message"
           :conversation-inbox-type="conversationInboxType"
         />
       </template>
 
-      <CopilotLoader v-if="isCaptainTyping" />
+      <CopilotLoader v-if="isAiagentTyping" />
     </div>
 
     <div
@@ -132,11 +132,11 @@ watch(
 
     <div class="mx-3 mt-px mb-2">
       <div class="flex items-center gap-2 justify-between w-full mb-1">
-        <ToggleCopilotAssistant
-          v-if="assistants.length"
-          :assistants="assistants"
-          :active-assistant="activeAssistant"
-          @set-assistant="$event => emit('setAssistant', $event)"
+        <ToggleCopilotTopic
+          v-if="topics.length"
+          :topics="topics"
+          :active-topic="activeTopic"
+          @set-topic="$event => emit('setTopic', $event)"
         />
         <div v-else />
         <button
@@ -145,7 +145,7 @@ watch(
           @click="handleReset"
         >
           <i class="i-lucide-refresh-ccw" />
-          <span>{{ $t('CAPTAIN.COPILOT.RESET') }}</span>
+          <span>{{ $t('AIAGENT.COPILOT.RESET') }}</span>
         </button>
       </div>
       <CopilotInput class="mb-1 w-full" @send="sendMessage" />
