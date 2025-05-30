@@ -9,6 +9,9 @@ class Api::V1::Accounts::Conversations::MessagesController < Api::V1::Accounts::
     user = Current.user || @resource
     mb = Messages::MessageBuilder.new(user, @conversation, params)
     @message = mb.perform
+
+    perform_sentiment_analysis(@message)
+    perform_intent_detection(@message)
   rescue StandardError => e
     render_could_not_create_error(e.message)
   end
@@ -76,5 +79,17 @@ class Api::V1::Accounts::Conversations::MessagesController < Api::V1::Accounts::
   def ensure_api_inbox
     # Only API inboxes can update messages
     render json: { error: 'Message status update is only allowed for API inboxes' }, status: :forbidden unless @conversation.inbox.api?
+  end
+
+  def perform_sentiment_analysis(message)
+    return unless message.content.present?
+
+    sentiment = SENTIMENT_ANALYZER.sentiment(message.content).to_s # => "positive", "negative", "neutral"
+
+    message.update(sentiment: sentiment)
+  end
+
+  def perform_intent_detection(message)
+    Messages::IntentDetectionService.new(message).perform
   end
 end
