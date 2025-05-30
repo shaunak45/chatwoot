@@ -8,6 +8,10 @@ gem 'rails', '~> 7.0.8.4'
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', require: false
 
+# Sentimental Analysis
+gem 'sentimental'
+gem 'classifier-reborn'
+
 ##-- rails application helper gems --##
 gem 'acts-as-taggable-on'
 gem 'attr_extras'

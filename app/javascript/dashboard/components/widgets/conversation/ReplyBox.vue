@@ -1007,6 +1007,9 @@ export default {
         message,
         private: this.isPrivate,
         sender: this.sender,
+        contentAttributes: {
+          sentiment: 'positive',
+        },
       };
       messagePayload = this.setReplyToInPayload(messagePayload);
 

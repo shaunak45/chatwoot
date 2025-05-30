@@ -438,6 +438,22 @@ export default {
         this.showBackgroundHighlight = false;
       }, HIGHLIGHT_TIMER);
     },
+    capitalize(str) {
+      if (!str) return '';
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    },
+    sentimentIcon(sentiment) {
+      switch (sentiment.toLowerCase()) {
+        case 'positive':
+          return '😊'; // happy face emoji
+        case 'negative':
+          return '☹️'; // sad face emoji
+        case 'neutral':
+          return '😐'; // neutral face emoji
+        default:
+          return '❓'; // question mark emoji
+      }
+    },
   },
 };
 </script>
@@ -489,12 +505,52 @@ export default {
             {{ $t('CONVERSATION.UNSUPPORTED_MESSAGE') }}
           </template>
         </div>
-        <BubbleText
+        <!-- <BubbleText
           v-else-if="data.content"
           :message="message"
           :is-email="isEmailContentType"
           :display-quoted-button="displayQuotedButton"
-        />
+        /> -->
+
+        <div v-else-if="data.content">
+          <BubbleText
+            :message="message"
+            :is-email="isEmailContentType"
+            :display-quoted-button="displayQuotedButton"
+          />
+          <div v-if="data.content_attributes">
+            <!-- Sentiment display -->
+            <div
+              v-if="data.content_attributes.sentiment"
+              class="sentiment-display"
+            >
+              <span
+                class="sentiment-icon"
+                :class="[
+                  `sentiment-${data.content_attributes.sentiment.toLowerCase()}`,
+                ]"
+              >
+                {{ sentimentIcon(data.content_attributes.sentiment) }}
+              </span>
+              <!-- Optional label -->
+              <!-- <span :class="`sentiment-label sentiment-${data.content_attributes.sentiment.toLowerCase()}`">
+                {{ capitalize(data.content_attributes.sentiment) }}
+              </span> -->
+            </div>
+
+            <!-- Intent display -->
+            <div v-if="data.content_attributes.intent" class="intent-display">
+              <span
+                class="intent-icon"
+                :class="[
+                  `intent-${data.content_attributes.intent.toLowerCase().split('_')[0]}`,
+                ]"
+              >
+                {{ capitalize(data.content_attributes.intent) }}
+              </span>
+            </div>
+          </div>
+        </div>
         <BubbleIntegration
           :message-id="data.id"
           :content-attributes="contentAttributes"
@@ -787,5 +843,56 @@ li.right {
       @apply text-woot-75 dark:text-woot-75;
     }
   }
+}
+
+.sentiment-display,
+.intent-display {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.sentiment-icon,
+.intent-icon {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  text-transform: capitalize;
+}
+
+/* Example dynamic classes */
+.sentiment-positive {
+  background-color: #e0f7e9;
+  color: #2e7d32;
+}
+.sentiment-negative {
+  background-color: #ffebee;
+  color: #c62828;
+}
+.sentiment-neutral {
+  background-color: #f0f0f0;
+  color: #616161;
+}
+
+.intent-refund {
+  background-color: #95ccf1;
+  color: #170356;
+}
+.intent-order {
+  background-color: #bbdefb;
+  color: #0d47a1;
+}
+.intent-complaint {
+  background-color: #f8bbd0;
+  color: #880e4f;
+}
+.intent-greeting {
+  background-color: #c8e6c9;
+  color: #1b5e20;
+}
+.intent-unknown {
+  background-color: #e0e0e0;
+  color: #424242;
 }
 </style>

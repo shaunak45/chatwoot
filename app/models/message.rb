@@ -63,6 +63,8 @@ class Message < ApplicationRecord
   before_validation :prevent_message_flooding
   before_save :ensure_processed_message_content
   before_save :ensure_in_reply_to
+  before_save :ensure_sentiment
+  before_save :ensure_intent
 
   validates :account_id, presence: true
   validates :inbox_id, presence: true
@@ -103,7 +105,7 @@ class Message < ApplicationRecord
   # [:external_error : Can specify if the message creation failed due to an error at external API
   store :content_attributes, accessors: [:submitted_email, :items, :submitted_values, :email, :in_reply_to, :deleted,
                                          :external_created_at, :story_sender, :story_id, :external_error,
-                                         :translations, :in_reply_to_external_id, :is_unsupported], coder: JSON
+                                         :translations, :in_reply_to_external_id, :is_unsupported, :sentiment, :intent, :intent_confidence], coder: JSON
 
   store :external_source_ids, accessors: [:slack], coder: JSON, prefix: :external_source_id
 
@@ -250,6 +252,15 @@ class Message < ApplicationRecord
       in_reply_to: in_reply_to,
       in_reply_to_external_id: in_reply_to_external_id
     ).perform
+  end
+
+  def ensure_sentiment
+    sentiment = content_attributes[:sentiment]
+  end
+
+  def ensure_intent
+    intent = content_attributes[:intent]
+    intent_confidence = content_attributes[:intent_confidence]
   end
 
   def ensure_content_type
